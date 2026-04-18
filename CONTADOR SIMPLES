@@ -1,0 +1,39 @@
+from machine import Pin, I2C
+import ssd1306
+import time
+
+# 1. Configuração do Hardware
+i2c = I2C(0, scl=Pin(27), sda=Pin(26))
+oled = ssd1306.SSD1306_I2C(128, 64, i2c)
+
+# 2. Inicializa a variável FORA do loop para ela não resetar
+contador = 0
+
+print("Iniciando contador no OLED...")
+
+while True:
+    # Limpa a tela para a nova escrita
+    oled.fill(0) 
+    
+    # Desenha o cabeçalho
+    oled.text("SaaS Telemetria", 0, 0)
+    oled.hline(0, 12, 128, 1) # Uma linha elegante para separar
+    
+    # Exibe o valor do contador
+    oled.text("Contagem:", 0, 30)
+    oled.text(str(contador), 80, 30) # str() converte número em texto
+    
+    # Lógica de reset (0 a 100)
+    if contador >= 100:
+        oled.text("RESETANDO...", 0, 50)
+        oled.show()
+        time.sleep(1) # Pausa para você conseguir ler a mensagem
+        contador = 0
+    else:
+        contador += 1
+    
+    # Atualiza o display físico
+    oled.show()
+    
+    # Velocidade da contagem (ajuste conforme necessário)
+    time.sleep_ms(1000)
