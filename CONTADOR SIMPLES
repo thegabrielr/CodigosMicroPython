@@ -1,30 +1,43 @@
-from machine import Pin, I2C
+from machine import Pin, I2C 
 import ssd1306
 import time
 
-# 1. Configuração do Hardware
+# A biblioteca machine é a principal para a utilização do micropython
+# O Pin permite controlar os pinos GPIO
+# I2C é o protocolo de comunicação que o ESP32 usa pra falar com o display
+# ssd1306 é o driver especifico para o chip que controla o dispplay da maioria dos displays OLED pequenos.
+# Até é possível não usar ele, mas você teria que enviar comandos binários para desenhar cada pixel.
+# A biblioteca time é utilizada para gerenciar pausas e tempos de execução.
+
 i2c = I2C(0, scl=Pin(27), sda=Pin(26))
 oled = ssd1306.SSD1306_I2C(128, 64, i2c)
 
-# 2. Inicializa a variável FORA do loop para ela não resetar
+# I2C(0,....) Inicia o primeiro barramento I2C do ESP32
+# scl=Pin(27), sda=Pin(26) é onde definimos os estão os fios do painel OLED
+# scl = Determina o ritmo da conversa entre ESP32 e painel
+# sda = Envia os dados da conversa entre ESP32 e painel
+# ssd.1306.... Cria o objeto oled. 128x64 determina a resolução e i2c qual barramento ele deve usar
+
 contador = 0
+
+#Inicia o contador fora do loop para que ele não sobrescrito
 
 print("Iniciando contador no OLED...")
 
 while True:
-    # Limpa a tela para a nova escrita
+    # Limpa a tela para a nova escrita. Importantíssimo. Apaga todos os pixels (cor 0 = preto). Se não fizer isso, o texto novo será desenhado por cima do antigo, virando um borrão.
     oled.fill(0) 
     
     # Desenha o cabeçalho
-    oled.text("SaaS Telemetria", 0, 0)
-    oled.hline(0, 12, 128, 1) # Uma linha elegante para separar
+    oled.text("Contador simples", 0, 0) # Indica a coordenada inicial (canto superior esquerdo)
+    oled.hline(0, 12, 128, 1) # Desenha uma linha horizontal. É um detalhe estético que consome pouco processamento
     
     # Exibe o valor do contador
     oled.text("Contagem:", 0, 30)
     oled.text(str(contador), 80, 30) # str() converte número em texto
     
     # Lógica de reset (0 a 100)
-    if contador >= 100:
+    if contador >= 1000:
         oled.text("RESETANDO...", 0, 50)
         oled.show()
         time.sleep(1) # Pausa para você conseguir ler a mensagem
